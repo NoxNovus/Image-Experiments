@@ -2,33 +2,36 @@ from PIL import Image
 import numpy as np
 import os
 
+SUPPORTED_FILE_TYPES = (
+    '.png', 
+    '.jpg', 
+    '.jpeg', 
+    '.bmp', 
+    '.gif'
+)
+
 def main():
     image_folder = "."
     num_images = 5
     img_matrices = load_images(image_folder, num_images)
 
     avg_matrix = average_matrix(img_matrices)
-
-    print(avg_matrix)
-    # image = Image.fromarray(avg_matrix)
-    # image.save("output.png")
+    image = Image.fromarray(avg_matrix)
+    image.save("output.png")
 
 
 def load_images(image_folder, num_images):
     """
-    Load in images from files
-
-    TODO: Make this better
+    Load in images from files in /images
     """
     image_matrices = []
-    for i in range(1, num_images + 1):
-        image_path = os.path.join(image_folder, f"{i}.png")
-        if os.path.exists(image_path):
-            image = Image.open(image_path)
-            image_matrix = np.array(image)
-            image_matrices.append(image_matrix)
-        else:
-            print(f"Image {i}.png not found in {image_folder}")
+    image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
+    image_files.sort() 
+    
+    for image_file in image_files:
+        if image_file.lower().endswith(SUPPORTED_FILE_TYPES):
+            image_matrices.append(np.array(Image.open(os.path.join(image_folder, image_file))))
+    
     return image_matrices
 
 
@@ -46,12 +49,23 @@ def size_correct(matrix_list):
 
 
 def average_matrix(matrix_list):
-    assert(size_correct(matrix_list))
-    for matrix in matrix_list:
-        for i in range(matrix.shape[0]):
-            for j in range(matrix.shape[1]):
+    """
+    Finds the average matrix from the matrix list using the average_color function
+    """
+    assert len(matrix_list) >= 1
+    assert size_correct(matrix_list)
 
+    rows = matrix_list[0].shape[0]
+    cols = matrix_list[0].shape[1]
+    result = np.zeros((rows, cols, 3), dtype=np.uint8)
+
+    for i in range(rows):
+        for j in range(cols):
+            colors_ij = [matrix[i][j] for matrix in matrix_list]
+            result[i][j] = average_color(colors_ij)
     
+    return result
+
 
 def average_color(colors):
     """

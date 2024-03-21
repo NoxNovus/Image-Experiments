@@ -2,6 +2,8 @@ from PIL import Image
 import numpy as np
 import os
 
+IMAGE_FOLDER = "./images"
+
 SUPPORTED_FILE_TYPES = (
     '.png', 
     '.jpg', 
@@ -10,42 +12,79 @@ SUPPORTED_FILE_TYPES = (
     '.gif'
 )
 
-def main():
-    image_folder = "."
-    num_images = 5
-    img_matrices = load_images(image_folder, num_images)
+WIDTH = 1920
+HEIGHT = 1080
 
+def main():
+    resize()
+    raw_matrices, filenames = load_images()
+    img_matrices = size_correct(raw_matrices, filenames)
     avg_matrix = average_matrix(img_matrices)
     image = Image.fromarray(avg_matrix)
     image.save("output.png")
 
 
-def load_images(image_folder, num_images):
+def resize():
+    """
+    Check if the user would like to run resize operations on their images.
+    """
+    def resize_op():
+        if not os.path.exists(IMAGE_FOLDER):
+            os.makedirs(IMAGE_FOLDER)
+
+        files = os.listdir(IMAGE_FOLDER)
+
+        for file_name in files:
+            input_path = os.path.join(IMAGE_FOLDER, file_name)
+            with Image.open(input_path) as img:
+                resized_img = img.resize((1920, 1080), Image.Resampling.NEAREST)
+                output_path = os.path.join(IMAGE_FOLDER, file_name)
+                resized_img.save(output_path)
+
+    user_input = input("Do you want to run the resize operation? (y/n): ").strip().lower()
+    if user_input == "y":
+        print("Resizing...")
+        resize_op()
+        print("Done.")
+    elif user_input == "n":
+        print("No resize operation will be performed.")
+    else:
+        print("Invalid input. Please enter 'yes' or 'no'.")
+
+
+def load_images():
     """
     Load in images from files in /images
-    """
+    """    
     image_matrices = []
-    image_files = [f for f in os.listdir(image_folder) if os.path.isfile(os.path.join(image_folder, f))]
+    index_to_filename = {}
+
+    image_files = [f for f in os.listdir(IMAGE_FOLDER) if os.path.isfile(os.path.join(IMAGE_FOLDER, f))]
     image_files.sort() 
     
-    for image_file in image_files:
+    for index, image_file in enumerate(image_files):
         if image_file.lower().endswith(SUPPORTED_FILE_TYPES):
-            image_matrices.append(np.array(Image.open(os.path.join(image_folder, image_file))))
+            image_matrices.append(np.array(Image.open(os.path.join(IMAGE_FOLDER, image_file))))
+            index_to_filename[index] = image_file
     
-    return image_matrices
+    return image_matrices, index_to_filename
 
 
-def size_correct(matrix_list):
+def size_correct(matrix_list, filenames):
     """
     Check if all matrices in matrix_list have the same size.
+    Removes any matrices that are not the same size as the first matrix.
     """
-    if len(matrix_list) == 0: return True 
+    result_list = []
     
     first_shape = matrix_list[0].shape
-    for matrix in matrix_list[1:]:
+    for i, matrix in enumerate(matrix_list):
         if matrix.shape != first_shape:
-            return False
-    return True
+            print(f"Image {filenames[i]} was misshaped, skipping")
+        else:
+            result_list.append(matrix)
+
+    return result_list
 
 
 def average_matrix(matrix_list):
@@ -53,7 +92,6 @@ def average_matrix(matrix_list):
     Finds the average matrix from the matrix list using the average_color function
     """
     assert len(matrix_list) >= 1
-    assert size_correct(matrix_list)
 
     rows = matrix_list[0].shape[0]
     cols = matrix_list[0].shape[1]

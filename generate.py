@@ -16,11 +16,31 @@ SUPPORTED_FILE_TYPES = (
 WIDTH = 1920
 HEIGHT = 1080
 
+NUM_NOISE_MATRICES = 10
+NUM_RANDOM_IMAGES = 36
+NUM_RED = 10
+
 def main():
+    # Resize if needed
     resize()
+
+    # Load in the images
     raw_matrices, filenames = load_images()
     img_matrices = size_correct(raw_matrices, filenames)
-    avg_matrix = random_average_matrix(img_matrices)
+
+    # Select NUM_RANDOM_IMAGES many of the original set
+    # img_matrices = random.choices(img_matrices, k=NUM_RANDOM_IMAGES)
+
+    # Add noise matrices
+    img_matrices.extend(generate_noise_matrices(NUM_NOISE_MATRICES))
+
+    # Add red matrices
+    img_matrices.extend(generate_color_matrices(NUM_RED, (255, 0, 0)))
+
+    # Generate average matrix
+    avg_matrix = vector_average_matrix(img_matrices)
+
+    # Output to image
     image = Image.fromarray(avg_matrix)
     image.save("output.png")
 
@@ -51,6 +71,21 @@ def resize():
         print("No resize operation will be performed.")
     else:
         print("Invalid input. Please enter 'yes' or 'no'.")
+
+
+def generate_noise_matrices(num_matrices):
+    """
+    Generates random noise matrices of WIDTH by HEIGHT
+    """
+    return [np.random.rand(HEIGHT, WIDTH, 3) for _ in range(num_matrices)]
+
+
+def generate_color_matrices(num_matrices, color):
+    """
+    Generates color matrices of WIDTH by HEIGHT
+    """
+    assert (isinstance(color, tuple) and len(color) == 3 and all(isinstance(component, int) for component in color))
+    return [np.full((HEIGHT, WIDTH, 3), color) for _ in range(num_matrices)]
 
 
 def load_images():
@@ -112,24 +147,6 @@ def vector_average_matrix(matrix_list):
     """
     assert len(matrix_list) >= 1
     return np.mean(np.stack(matrix_list, axis=-1), axis=-1).astype(np.uint8)
-
-
-def random_average_matrix(matrix_list):
-    """
-    Finds the average matrix from the matrix list, weight images randomly
-    """
-    matrix_list = np.array(matrix_list)
-    weights = [random.random() for _ in range(len(matrix_list))]
-    
-    if len(matrix_list) != len(weights):
-        raise ValueError("Lengths of matrix_list and weights must be equal")
-    
-    weights_broadcasted = np.broadcast_to(weights, matrix_list.shape)
-    weighted_matrix = matrix_list * weights_broadcasted
-    weighted_avg = np.mean(weighted_matrix, axis=-1)
-    weighted_avg_uint8 = weighted_avg.astype(np.uint8)
-    
-    return weighted_avg_uint8
 
 
 def average_color(colors):

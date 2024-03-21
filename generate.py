@@ -16,9 +16,9 @@ SUPPORTED_FILE_TYPES = (
 WIDTH = 1920
 HEIGHT = 1080
 
-NUM_NOISE_MATRICES = 5
-NUM_RANDOM_IMAGES = 20
-NUM_BLACK = 0
+NUM_NOISE_MATRICES = 1
+NUM_RANDOM_IMAGES = 10
+NUM_BRIGHTENER = 1
 
 def main():
     # Resize if needed
@@ -35,7 +35,7 @@ def main():
     img_matrices.extend(generate_noise_matrices(NUM_NOISE_MATRICES))
 
     # Add black matrices
-    img_matrices.extend(generate_color_matrices(NUM_BLACK, (0, 0, 0)))
+    img_matrices.extend(generate_color_matrices(NUM_BRIGHTENER, (180, 180, 65)))
 
     # Generate average matrix
     avg_matrix = vector_average_matrix(img_matrices)

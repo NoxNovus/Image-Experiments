@@ -19,7 +19,7 @@ def main():
     resize()
     raw_matrices, filenames = load_images()
     img_matrices = size_correct(raw_matrices, filenames)
-    avg_matrix = average_matrix(img_matrices)
+    avg_matrix = vector_average_matrix(img_matrices)
     image = Image.fromarray(avg_matrix)
     image.save("output.png")
 
@@ -87,22 +87,9 @@ def size_correct(matrix_list, filenames):
     return result_list
 
 
-def average_matrix(matrix_list):
-    """
-    Finds the average matrix from the matrix list using the average_color function
-    """
+def vector_average_matrix(matrix_list):
     assert len(matrix_list) >= 1
-
-    rows = matrix_list[0].shape[0]
-    cols = matrix_list[0].shape[1]
-    result = np.zeros((rows, cols, 3), dtype=np.uint8)
-
-    for i in range(rows):
-        for j in range(cols):
-            colors_ij = [matrix[i][j] for matrix in matrix_list]
-            result[i][j] = average_color(colors_ij)
-    
-    return result
+    return np.mean(np.stack(matrix_list, axis=-1), axis=-1).astype(np.uint8)
 
 
 def average_color(colors):

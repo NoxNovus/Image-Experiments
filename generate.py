@@ -121,5 +121,6 @@ def average_color(colors):
     assert all((isinstance(color, np.ndarray) and color.ndim == 1) for color in colors)
     return np.mean(np.array(colors), axis=0)
 
+
 if __name__ == "__main__":
     main()

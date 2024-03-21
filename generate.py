@@ -87,6 +87,24 @@ def size_correct(matrix_list, filenames):
     return result_list
 
 
+def average_matrix(matrix_list):
+    """
+    Finds the average matrix from the matrix list using the average_color function
+    """
+    assert len(matrix_list) >= 1
+
+    rows = matrix_list[0].shape[0]
+    cols = matrix_list[0].shape[1]
+    result = np.zeros((rows, cols, 3), dtype=np.uint8)
+
+    for i in range(rows):
+        for j in range(cols):
+            colors_ij = [matrix[i][j] for matrix in matrix_list]
+            result[i][j] = average_color(colors_ij)
+
+    return result
+
+
 def vector_average_matrix(matrix_list):
     """
     Finds the average matrix from the matrix list

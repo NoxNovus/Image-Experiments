@@ -16,9 +16,9 @@ SUPPORTED_FILE_TYPES = (
 WIDTH = 1920
 HEIGHT = 1080
 
-NUM_NOISE_MATRICES = 10
-NUM_RANDOM_IMAGES = 36
-NUM_RED = 10
+NUM_NOISE_MATRICES = 5
+NUM_RANDOM_IMAGES = 20
+NUM_BLACK = 0
 
 def main():
     # Resize if needed
@@ -29,13 +29,13 @@ def main():
     img_matrices = size_correct(raw_matrices, filenames)
 
     # Select NUM_RANDOM_IMAGES many of the original set
-    # img_matrices = random.choices(img_matrices, k=NUM_RANDOM_IMAGES)
+    img_matrices = random.choices(img_matrices, k=NUM_RANDOM_IMAGES)
 
     # Add noise matrices
     img_matrices.extend(generate_noise_matrices(NUM_NOISE_MATRICES))
 
-    # Add red matrices
-    img_matrices.extend(generate_color_matrices(NUM_RED, (255, 0, 0)))
+    # Add black matrices
+    img_matrices.extend(generate_color_matrices(NUM_BLACK, (0, 0, 0)))
 
     # Generate average matrix
     avg_matrix = vector_average_matrix(img_matrices)
@@ -77,7 +77,7 @@ def generate_noise_matrices(num_matrices):
     """
     Generates random noise matrices of WIDTH by HEIGHT
     """
-    return [np.random.rand(HEIGHT, WIDTH, 3) for _ in range(num_matrices)]
+    return [np.random.rand(HEIGHT, WIDTH, 3) * 255 for _ in range(num_matrices)]
 
 
 def generate_color_matrices(num_matrices, color):

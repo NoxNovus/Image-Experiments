@@ -1,6 +1,7 @@
 from PIL import Image
 import numpy as np
 import os
+import random
 
 IMAGE_FOLDER = "./images"
 
@@ -19,7 +20,7 @@ def main():
     resize()
     raw_matrices, filenames = load_images()
     img_matrices = size_correct(raw_matrices, filenames)
-    avg_matrix = vector_average_matrix(img_matrices)
+    avg_matrix = random_average_matrix(img_matrices)
     image = Image.fromarray(avg_matrix)
     image.save("output.png")
 
@@ -111,6 +112,24 @@ def vector_average_matrix(matrix_list):
     """
     assert len(matrix_list) >= 1
     return np.mean(np.stack(matrix_list, axis=-1), axis=-1).astype(np.uint8)
+
+
+def random_average_matrix(matrix_list):
+    """
+    Finds the average matrix from the matrix list, weight images randomly
+    """
+    matrix_list = np.array(matrix_list)
+    weights = [random.random() for _ in range(len(matrix_list))]
+    
+    if len(matrix_list) != len(weights):
+        raise ValueError("Lengths of matrix_list and weights must be equal")
+    
+    weights_broadcasted = np.broadcast_to(weights, matrix_list.shape)
+    weighted_matrix = matrix_list * weights_broadcasted
+    weighted_avg = np.mean(weighted_matrix, axis=-1)
+    weighted_avg_uint8 = weighted_avg.astype(np.uint8)
+    
+    return weighted_avg_uint8
 
 
 def average_color(colors):

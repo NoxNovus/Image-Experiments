@@ -88,6 +88,9 @@ def size_correct(matrix_list, filenames):
 
 
 def vector_average_matrix(matrix_list):
+    """
+    Finds the average matrix from the matrix list
+    """
     assert len(matrix_list) >= 1
     return np.mean(np.stack(matrix_list, axis=-1), axis=-1).astype(np.uint8)
 

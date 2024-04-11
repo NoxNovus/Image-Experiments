@@ -10,15 +10,16 @@ SUPPORTED_FILE_TYPES = (
     '.jpg', 
     '.jpeg', 
     '.bmp', 
-    '.gif'
+    '.gif',
+    '.jfif'
 )
 
 WIDTH = 1920
 HEIGHT = 1080
 
 NUM_NOISE_MATRICES = 0
-NUM_RANDOM_IMAGES = 4
-NUM_TONER = 1
+NUM_RANDOM_IMAGES = 30
+NUM_TONER = 0
 
 def main():
     # Resize if needed

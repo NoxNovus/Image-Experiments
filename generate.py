@@ -2,6 +2,7 @@ from PIL import Image
 import numpy as np
 import os
 import random
+import time
 
 IMAGE_FOLDER = "./images"
 
@@ -18,8 +19,9 @@ WIDTH = 1920
 HEIGHT = 1080
 
 NUM_NOISE_MATRICES = 0
-NUM_RANDOM_IMAGES = 30
+NUM_RANDOM_IMAGES = 7
 NUM_TONER = 0
+NUM_RESULT = 25
 
 def main():
     # Resize if needed
@@ -27,23 +29,26 @@ def main():
 
     # Load in the images
     raw_matrices, filenames = load_images()
-    img_matrices = size_correct(raw_matrices, filenames)
+    matrix_set = size_correct(raw_matrices, filenames)
 
-    # Select NUM_RANDOM_IMAGES many of the original set
-    # img_matrices = random.choices(img_matrices, k=NUM_RANDOM_IMAGES)
+    # Generate NUM_RESULTS many images
+    for i in range(NUM_RESULT):
 
-    # Add noise matrices
-    img_matrices.extend(generate_noise_matrices(NUM_NOISE_MATRICES))
+        # Select NUM_RANDOM_IMAGES many of the original set
+        img_matrices = random.choices(matrix_set, k=NUM_RANDOM_IMAGES)
 
-    # Add toner
-    img_matrices.extend(generate_color_matrices(NUM_TONER, (85, 20, 85)))
+        # Add noise matrices
+        img_matrices.extend(generate_noise_matrices(NUM_NOISE_MATRICES))
 
-    # Generate average matrix
-    avg_matrix = vector_average_matrix(img_matrices)
+        # Add toner
+        img_matrices.extend(generate_color_matrices(NUM_TONER, (85, 20, 85)))
 
-    # Output to image
-    image = Image.fromarray(avg_matrix)
-    image.save("output.png")
+        # Generate average matrix
+        avg_matrix = vector_average_matrix(img_matrices)
+
+        # Output to image
+        image = Image.fromarray(avg_matrix)
+        image.save(f"output{i + 1}_{time.time()}.png")
 
 
 def resize():
